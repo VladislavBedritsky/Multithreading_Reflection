@@ -13,23 +13,23 @@ public class BoundedBlockingBuffer {
         this.exchanger = exchanger;
     }
 
-    public void take() {
+    public synchronized void take() {
         new Thread(() -> {
             try {
-                System.out.println(exchanger.exchange(null));
-                System.out.println(exchanger.exchange(null));
+                Object object = exchanger.exchange(null);
+                System.out.println(object);
+                object = exchanger.exchange(null);
+                System.out.println(object);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }).start();
     }
 
-    public void put(Object data) {
-        this.data = data;
+    public synchronized void put(Object object) {
         new Thread(() -> {
             try {
-                exchanger.exchange(data);
-                sleep(1000);
+                exchanger.exchange(object);
                 exchanger.exchange("something else");
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -37,10 +37,4 @@ public class BoundedBlockingBuffer {
         }).start();
     }
 
-    @Override
-    public String toString() {
-        return "BoundedBlockingBuffer{" +
-                "data=" + data +
-                '}';
-    }
 }
